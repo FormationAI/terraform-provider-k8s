@@ -36,6 +36,7 @@ func main() {
 				},
 				ResourcesMap: map[string]*schema.Resource{
 					"k8s_manifest": resourceManifest(),
+                                        "k8s_manifest_once": resourceManifestUnsafe(),
 				},
 				ConfigureFunc: func(d *schema.ResourceData) (interface{}, error) {
 					return &config{
@@ -52,6 +53,23 @@ func resourceManifest() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceManifestCreate,
 		Read:   resourceManifestRead,
+		Update: resourceManifestUpdate,
+		Delete: resourceManifestDelete,
+
+		Schema: map[string]*schema.Schema{
+			"content": &schema.Schema{
+				Type:      schema.TypeString,
+				Required:  true,
+				Sensitive: true,
+			},
+		},
+	}
+}
+
+func resourceManifestUnsafe() *schema.Resource {
+	return &schema.Resource{
+		Create: resourceManifestCreate,
+		Read:   resourceManifestReadUnsafe,
 		Update: resourceManifestUpdate,
 		Delete: resourceManifestDelete,
 
@@ -237,5 +255,9 @@ func resourceManifestRead(d *schema.ResourceData, m interface{}) error {
 	if strings.TrimSpace(stdout.String()) == "" {
 		d.SetId("")
 	}
+	return nil
+}
+
+func resourceManifestReadUnsafe(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
